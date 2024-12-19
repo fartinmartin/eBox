@@ -10,16 +10,19 @@ const thisLayer = new Layer();
 const thisProperty = new PathProperty([[0, 0]]);
 
 // eBox types
-type Anchor =
-  | 'topLeft'
-  | 'topCenter'
-  | 'topRight'
-  | 'bottomRight'
-  | 'bottomCenter'
-  | 'bottomLeft'
-  | 'centerLeft'
-  | 'center'
-  | 'centerRight';
+const anchors = [
+  'topLeft',
+  'topCenter',
+  'topRight',
+  'bottomRight',
+  'bottomCenter',
+  'bottomLeft',
+  'centerLeft',
+  'center',
+  'centerRight',
+] as const;
+
+type Anchor = typeof anchors[number];
 
 type Rounding = [number, number, number, number];
 
@@ -302,4 +305,4 @@ function createBox({
 
 const version: string = '_npmVersion';
 
-export { createBox, version };
+export { createBox, anchors, version };
