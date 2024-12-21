@@ -10,26 +10,23 @@ const thisLayer = new Layer();
 const thisProperty = new PathProperty([[0, 0]]);
 
 // eBox types
-const anchors = [
-  'topLeft',
-  'topCenter',
-  'topRight',
-  'bottomRight',
-  'bottomCenter',
-  'bottomLeft',
-  'centerLeft',
-  'center',
-  'centerRight',
-] as const;
-
-type Anchor = typeof anchors[number];
+type Anchor =
+  | 'topLeft'
+  | 'topCenter'
+  | 'topRight'
+  | 'bottomRight'
+  | 'bottomCenter'
+  | 'bottomLeft'
+  | 'centerLeft'
+  | 'center'
+  | 'centerRight';
 
 type Rounding = [number, number, number, number];
 
 interface BoxProps {
   size: Vector2D;
   position: Vector2D;
-  anchor: Anchor;
+  anchor: Anchor | number;
   isClosed: boolean;
   rounding: Rounding;
   tangentMult: number;
@@ -44,6 +41,8 @@ function createBox({
   // From https://spencermortensen.com/articles/bezier-circle/
   tangentMult = 0.55,
 }: BoxProps) {
+  anchor = resolveAnchor(anchor);
+  
   const tempPoints = sizeToPoints(size);
   const centerPosition = anchorPositionToCenterPosition(position, size, anchor);
   const centeredPoints = movePoints(tempPoints, [0, 0], centerPosition);
@@ -301,8 +300,44 @@ function createBox({
   function pointsToComp(points: Points): Points {
     return points.map((point): Vector2D => thisLayer.fromComp(point)) as Points;
   }
+
+  function resolveAnchor(anchor: Anchor | number): Anchor {
+    const anchors = [
+      'topLeft',
+      'topCenter',
+      'topRight',
+      'bottomRight',
+      'bottomCenter',
+      'bottomLeft',
+      'centerLeft',
+      'center',
+      'centerRight',
+    ] as Anchor[];
+
+    if (typeof anchor === 'number') {
+      const resolvedAnchor = anchors[anchor - 1];
+
+      if (!resolvedAnchor) {
+        throw new Error(
+          `'${anchor}' is not a valid anchor index. Must be in range: 1-${anchors.length}`
+        );
+      }
+
+      return resolvedAnchor;
+    }
+
+    if (!anchors.includes(anchor)) {
+      throw new Error(
+        `'${anchor}' is not a valid anchor. Must be one of: ${anchors.join(
+          ', '
+        )}`
+      );
+    }
+
+    return anchor;
+  }
 }
 
 const version: string = '_npmVersion';
 
-export { createBox, anchors, version };
+export { createBox, version };
